@@ -3,6 +3,9 @@ package com.chaeny.compose
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import com.chaeny.compose.ui.theme.ComposeTheme
 
@@ -102,9 +106,14 @@ fun OnboardingPreview() {
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     // 구성변경 후에도 expaned가 유지됨
     var expanded by rememberSaveable { mutableStateOf(false) }
-    val extraPadding = if (expanded) 48.dp else 0.dp
-    // 간단한 계산을 실행하므로 리컴포지션에 대비하여 이 값을 기억할 필요가 없음
 
+    val extraPadding by animateDpAsState(
+        if (expanded) 48.dp else 0.dp,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ), label = "expand animation"
+    )
     Surface(
         color = MaterialTheme.colorScheme.primary, // 배경 색상 설정
         modifier = modifier.padding(vertical = 4.dp, horizontal = 8.dp)
@@ -113,7 +122,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
             Column(
                 modifier = modifier
                     .weight(1f)
-                    .padding(bottom = extraPadding)
+                    .padding(bottom = extraPadding.coerceAtLeast(0.dp))
             ) {
                 Text(text = "Hello, ")
                 Text(text = name)
